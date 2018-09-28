@@ -1604,7 +1604,7 @@ def _c_accessors_list(self, field):
     # the reason is that switch is either a child of a request/reply or nested in another switch,
     # so whenever we need to access a length field, we might need to refer to some anchestor type
     switch_obj = self if self.is_switch else None
-    if self.is_bitcase:
+    if self.is_case_or_bitcase:
         switch_obj = self.parents[-1]
     if switch_obj is not None:
         c_type = switch_obj.c_type
@@ -1656,7 +1656,7 @@ def _c_accessors_list(self, field):
 
     request_name = _ext(_n_item(self.name[-1]))
 
-    if list.member.fixed_size() and not self.is_bitcase:
+    if list.member.fixed_size() and not self.is_case_or_bitcase:
         if field.c_field_type == "char":
             _cpp_request_objects[request_name].accessors.append( \
             Accessor(is_string=True,
@@ -1682,7 +1682,7 @@ def _c_accessors_list(self, field):
         # sys.stderr.write('field: %s\n' % (field))
         # sys.stderr.write('\n\n')
 
-        if not self.is_bitcase:
+        if not self.is_case_or_bitcase:
             _cpp_request_objects[request_name].accessors.append( \
             Accessor(is_variable=True,
                      member=_ext(_n_item(field.field_name)),
