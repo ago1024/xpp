@@ -7,6 +7,8 @@ from resource_classes import _resource_classes
 from cppreply import CppReply
 from cppcookie import CppCookie
 
+_keywords = {'union' : 'union_'};
+
 _templates = {}
 
 _templates['void_request_function'] = \
@@ -190,6 +192,9 @@ class CppRequest(object):
         if not is_connection:
             member = "resource(),\n"
             method_name = replace_class(method_name, class_name)
+
+        if method_name in _keywords:
+            method_name = _keywords[method_name]
 
         if self.is_void:
             return _inline_void_class(self.request_name, method_name, member, get_namespace(self.namespace))
