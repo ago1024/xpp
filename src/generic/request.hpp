@@ -67,7 +67,7 @@ class reply<Derived,
 
     operator bool(void)
     {
-      return m_reply.operator bool();
+      return get().operator bool();
     }
 
     const Reply &
