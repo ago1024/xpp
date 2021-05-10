@@ -1,3 +1,4 @@
+from builtins import object
 from utils import _n, _ext, _n_item, get_namespace
 
 _templates = {}

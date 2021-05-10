@@ -1,5 +1,6 @@
 # vim: set ts=4 sws=4 sw=4:
 
+from builtins import object
 import sys # stderr
 import copy # deepcopy
 

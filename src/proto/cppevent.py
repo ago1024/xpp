@@ -1,3 +1,6 @@
+from builtins import map
+from builtins import object
+from functools import total_ordering
 import sys # stderr
 
 from utils import \
@@ -128,17 +131,17 @@ def event_dispatcher_class(namespace, cppevents):
     # >>> if end <<<
 
     if len(typedef) > 0:
-        typedef = "\n".join(map(lambda s: "    " + s, typedef)) + "\n"
+        typedef = "\n".join(["    " + s for s in typedef]) + "\n"
     else:
         typedef = ""
 
     if len(ctors) > 0:
-        ctors = "\n".join(map(lambda s: ("    " if len(s) > 0 else "") + s, ctors)) + "\n"
+        ctors = "\n".join([("    " if len(s) > 0 else "") + s for s in ctors]) + "\n"
     else:
         ctors = ""
 
     if len(members) > 0:
-        members = "\n".join(map(lambda s: "  " + s, members)) + "\n"
+        members = "\n".join(["  " + s for s in members]) + "\n"
     else:
         members = ""
 
@@ -186,6 +189,7 @@ def event_switch_cases(cppevents, arg_switch, arg_handler, arg_event, ns):
 
 ########## EVENT ##########
 
+@total_ordering
 class CppEvent(object):
     def __init__(self, opcode, opcode_name, c_name, namespace, name, fields):
         self.opcode = opcode
@@ -194,7 +198,7 @@ class CppEvent(object):
         self.namespace = namespace
         self.fields = fields
 
-        self.names = map(str.lower, _n_item(name[-1], True))
+        self.names = list(map(str.lower, _n_item(name[-1], True)))
         self.name = "_".join(map(str.lower, self.names))
 
         self.nssopen = ""
@@ -213,6 +217,15 @@ class CppEvent(object):
             return -1
         else:
             return 1
+    
+    def __eq__(self, other):
+        return self.opcode == other.opcode
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __lt__(self, other):
+        return self.opcode < other.opcode
 
     def get_name(self):
         return _reserved_keywords.get(self.name, self.name)
@@ -305,17 +318,17 @@ class CppEvent(object):
             m_first_event = "    const uint8_t m_first_event;\n"
 
         if len(opcode_accessor) > 0:
-            opcode_accessor = "\n".join(map(lambda s: "    " + s, opcode_accessor)) + "\n"
+            opcode_accessor = "\n".join(["    " + s for s in opcode_accessor]) + "\n"
         else:
             opcode_accessor = ""
 
         if len(ctor) > 0:
-            ctor = "\n".join(map(lambda s: "    " + s, ctor)) + "\n"
+            ctor = "\n".join(["    " + s for s in ctor]) + "\n"
         else:
             ctor = ""
 
         if len(typedef) > 0:
-            typedef = "\n".join(map(lambda s: "    " + s, typedef)) + "\n\n"
+            typedef = "\n".join(["    " + s for s in typedef]) + "\n\n"
         else:
             typedef = ""
 
@@ -327,12 +340,12 @@ class CppEvent(object):
             member_accessors_special = ""
 
         if len(description) > 0:
-            description = "\n" + "\n".join(map(lambda s: "    " + s, description)) + "\n"
+            description = "\n" + "\n".join(["    " + s for s in description]) + "\n"
         else:
             description = ""
 
         if len(first_event) > 0:
-            first_event = "\n" + "\n".join(map(lambda s: "    " + s, first_event)) + "\n"
+            first_event = "\n" + "\n".join(["    " + s for s in first_event]) + "\n"
         else:
             first_event = ""
 

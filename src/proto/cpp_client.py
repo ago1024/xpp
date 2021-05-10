@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # vim: set ts=4 sws=4 sw=4:
 
+from __future__ import print_function
+from builtins import str
+from builtins import range
 from xml.etree.cElementTree import *
 from os.path import basename
 from functools import reduce
@@ -286,7 +289,7 @@ def build_collision_table():
     global namecount
     namecount = {}
 
-    for v in module.types.values():
+    for v in list(module.types.values()):
         name = _t(v[0])
         namecount[name] = (namecount.get(name) or 0) + 1
 
@@ -588,7 +591,7 @@ def get_expr_fields(self):
         prefix.append(('', '', self))
 
     all_fields = _c_helper_resolve_field_names (prefix)
-    resolved_fields_names = list(filter(lambda x: x in all_fields.keys(), unresolved_fields_names))
+    resolved_fields_names = list([x for x in unresolved_fields_names if x in list(all_fields.keys())])
     if len(unresolved_fields_names) != len(resolved_fields_names):
         raise Exception("could not resolve all fields for %s" % self.name)
 
@@ -817,8 +820,8 @@ def _c_serialize_helper_list_field(context, self, field,
     param_names = [p[2] for p in params]
 
     expr_fields_names = [f.field_name for f in get_expr_fields(field.type)]
-    resolved = list(filter(lambda x: x in param_names, expr_fields_names))
-    unresolved = list(filter(lambda x: x not in param_names, expr_fields_names))
+    resolved = list([x for x in expr_fields_names if x in param_names])
+    unresolved = list([x for x in expr_fields_names if x not in param_names])
 
     field_mapping = {}
     for r in resolved:
@@ -831,8 +834,8 @@ def _c_serialize_helper_list_field(context, self, field,
                             field.c_field_name)
 
         field_mapping.update(_c_helper_resolve_field_names(prefix))
-        resolved += list(filter(lambda x: x in field_mapping, unresolved))
-        unresolved = list(filter(lambda x: x not in field_mapping, unresolved))
+        resolved += list([x for x in unresolved if x in field_mapping])
+        unresolved = list([x for x in unresolved if x not in field_mapping])
         if len(unresolved)>0:
             raise Exception('could not resolve the length fields required for list %s' % field.c_field_name)
 
@@ -1162,7 +1165,7 @@ def _c_serialize(context, self):
         param_str.append("%s%s%s  %s%s  /**< */" % (indent, typespec, spacing, pointerspec, field_name))
     # insert function name
     param_str[0] = "%s (%s" % (func_name, param_str[0].strip())
-    param_str = list(map(lambda x: "%s," % x, param_str))
+    param_str = list(["%s," % x for x in param_str])
 
     # >>> THIS! <<< #
     # for s in param_str[:-1]:
@@ -1249,7 +1252,7 @@ def _c_serialize(context, self):
         if not (self.is_switch or self.var_followed_by_fixed_fields):
 
             # look if we have to declare an '_aux' variable at all
-            if len(list(filter(lambda x: x.find('_aux')!=-1, code_lines)))>0:
+            if len(list([x for x in code_lines if x.find('_aux')!=-1]))>0:
                 if not self.var_followed_by_fixed_fields:
                     _c('    const %s *_aux = (%s *)_buffer;', self.c_type, self.c_type)
                 else:
@@ -2492,7 +2495,7 @@ def _man_request(self, name, cookie_type, void, aux):
                 for field in b.type.fields:
                     _c_complex_field(self, field, space)
                 if b.type.has_name:
-                    print >> sys.stderr, 'ERROR: New unhandled documentation case'
+                    print('ERROR: New unhandled documentation case', file=sys.stderr)
                     pass
 
         f.write('} \\fB%s\\fP;\n' % self.reply.c_type)
@@ -2751,7 +2754,7 @@ def _man_request(self, name, cookie_type, void, aux):
                 (cookie_type, self.c_reply_name, base_func_name))
     f.write('.SH ERRORS\n')
     if hasattr(self, "doc") and self.doc:
-        for errtype, errtext in self.doc.errors.items():
+        for errtype, errtext in list(self.doc.errors.items()):
             f.write('.IP \\fI%s\\fP 1i\n' % (_t(('xcb', errtype, 'error'))))
             errtext = re.sub(r'`([^`]+)`', r'\\fI\1\\fP', errtext)
             f.write('%s\n' % (errtext))
@@ -2769,7 +2772,7 @@ def _man_request(self, name, cookie_type, void, aux):
         see = ['.BR %s (3)' % 'xcb-requests']
         if self.doc.example:
             see.append('.BR %s (3)' % 'xcb-examples')
-        for seename, seetype in self.doc.see.items():
+        for seename, seetype in list(self.doc.see.items()):
             if seetype == 'program':
                 see.append('.BR %s (1)' % seename)
             elif seetype == 'event':
@@ -2830,7 +2833,7 @@ def _man_event(self, name):
             spacing = ' ' * (maxtypelen - len(field.c_field_type))
             f.write('%s    %s%s \\fI%s\\fP%s;\n' % (space, field.c_field_type, spacing, field.c_field_name, field.c_subscript))
         else:
-            print >> sys.stderr, 'ERROR: New unhandled documentation case'
+            print('ERROR: New unhandled documentation case', file=sys.stderr)
 
     if not self.is_switch:
         for field in struct_fields:
@@ -2843,7 +2846,7 @@ def _man_event(self, name):
             for field in b.type.fields:
                 _c_complex_field(self, field, space)
             if b.type.has_name:
-                print >> sys.stderr, 'ERROR: New unhandled documentation case'
+                print('ERROR: New unhandled documentation case', file=sys.stderr)
                 pass
 
     f.write('} \\fB%s\\fP;\n' % self.c_type)
@@ -2899,7 +2902,7 @@ def _man_event(self, name):
         see = ['.BR %s (3)' % 'xcb_generic_event_t']
         if self.doc.example:
             see.append('.BR %s (3)' % 'xcb-examples')
-        for seename, seetype in self.doc.see.items():
+        for seename, seetype in list(self.doc.see.items()):
             if seetype == 'program':
                 see.append('.BR %s (1)' % seename)
             elif seetype == 'event':
@@ -3061,7 +3064,7 @@ def cpp_prototypes():
     {}\
 """ % (name, type, name, name, name)
 
-    for key in _type_objects[get_namespace(_ns)].keys():
+    for key in list(_type_objects[get_namespace(_ns)].keys()):
         name = _ext(_n_item(key))
         type = ("" if get_namespace(_ns) == "xproto" else get_namespace(_ns) + "_") + name
 
@@ -3087,7 +3090,7 @@ def cpp_prototypes():
             _h("")
 
 def cpp_type_classes():
-    for key in _type_objects[get_namespace(_ns)].keys():
+    for key in list(_type_objects[get_namespace(_ns)].keys()):
         type = _ext(_n_item(key))
         if len(_type_objects[get_namespace(_ns)][key]) > 0:
             # _h("")

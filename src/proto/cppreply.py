@@ -1,3 +1,4 @@
+from builtins import object
 from utils import _n, _ext, _n_item, get_namespace
 from resource_classes import _resource_classes
 
@@ -112,7 +113,7 @@ class CppReply(object):
             + "_" + self.request_name
 
     def make_accessors(self):
-        return "\n".join(map(lambda a: "\n%s\n" % a, self.accessors))
+        return "\n".join(["\n%s\n" % a for a in self.accessors])
 
     def make(self):
         accessors = [self.make_accessors()]

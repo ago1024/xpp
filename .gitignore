@@ -3,3 +3,5 @@
 *.swp
 *.gch
 *.d
+*.pyc
+*.hpp

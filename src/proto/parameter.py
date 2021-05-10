@@ -1,6 +1,9 @@
 # vim: set ts=4 sws=4 sw=4:
 
+from builtins import str
+from builtins import object
 import sys # stderr
+import functools
 
 _templates = {}
 
@@ -11,6 +14,25 @@ typedef typename value_type<%s, ! std::is_pointer<%s>::value>::type
 std::vector<vector_type> %s =
   { value_iterator<%s>(%s), value_iterator<%s>(%s) };
 '''
+
+def none_cmp(x, y):
+    """
+    Replacement for built-in function cmp that was removed in Python 3
+
+    Compare the two objects x and y and return an integer according to
+    the outcome. The return value is negative if x < y, zero if x == y
+    and strictly positive if x > y.
+    """
+
+    if (x == None and y == None):
+        return 0
+    if (x == None):
+        return -1
+    if (y == None):
+        return 1
+    return (x > y) - (x < y)
+
+key_func = functools.cmp_to_key(lambda p1, p2: none_cmp(p1.default, p2.default))
 
 def _initializer(iter_type, c_name, iter_begin, iter_end):
     return _templates['initializer'] % \
@@ -45,24 +67,24 @@ class ParameterList(object):
         return "" if len(self.parameter) == 0 else ", "
 
     def is_reordered(self):
-        tmp = sorted(self.parameter, cmp=lambda p1, p2: cmp(p1.default, p2.default))
+        tmp = sorted(self.parameter, key=key_func)
         return tmp != self.parameter
 
     def calls(self, sort, params=None):
         ps = self.parameter if params == None else params
         if sort:
-            tmp = sorted(ps, cmp=lambda p1, p2: cmp(p1.default, p2.default))
+            tmp = sorted(ps, key=key_func)
             ps = tmp
-        calls = map(lambda p: p.call(), ps)
+        calls = [p.call() for p in ps]
         return "" if len(calls) == 0 else ", ".join(calls)
 
     def protos(self, sort, defaults, params=None):
         if defaults: sort = True
         ps = self.parameter if params == None else params
         if sort:
-            tmp = sorted(ps, cmp=lambda p1, p2: cmp(p1.default, p2.default))
+            tmp = sorted(ps, key=key_func)
             ps = tmp
-        protos = map(lambda p: p.proto(defaults), ps)
+        protos = [p.proto(defaults) for p in ps]
         return "" if len(protos) == 0 else ", ".join(protos)
 
     def iterator_initializers(self):
@@ -86,7 +108,7 @@ class ParameterList(object):
 
             if param.field.type.is_list:
                 name = param.field.type.expr.lenfield_name
-                if lenfields.has_key(name):
+                if name in lenfields:
                     lenfields[name].append(param.c_name)
                 else:
                     lenfields[name] = [ param.c_name ]
@@ -209,7 +231,7 @@ class ParameterList(object):
 
         # end: for index, param in enumerate(self.parameter):
 
-        for k, v in lenfields.items():
+        for k, v in list(lenfields.items()):
             if len(v) > 1:
                 sys.stderr.write("list: %s, %s\n" % (k, v))
 

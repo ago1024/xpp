@@ -1,6 +1,7 @@
 # vim: set ts=4 sws=4 sw=4:
 
 # from utils import *
+from builtins import object
 from utils import _n, _ext, _n_item, get_namespace
 from parameter import *
 from resource_classes import _resource_classes

@@ -1,3 +1,4 @@
+from builtins import object
 from resource_classes import _resource_classes
 
 _templates = {}

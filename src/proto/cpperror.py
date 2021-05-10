@@ -1,3 +1,5 @@
+from builtins import map
+from builtins import object
 from utils import \
         get_namespace, \
         get_ext_name, \
@@ -73,17 +75,17 @@ def error_dispatcher_class(namespace, cpperrors):
     # >>> if end <<<
 
     if len(typedef) > 0:
-        typedef = "\n".join(map(lambda s: "    " + s, typedef)) + "\n"
+        typedef = "\n".join(["    " + s for s in typedef]) + "\n"
     else:
         typedef = ""
 
     if len(ctors) > 0:
-        ctors = "\n".join(map(lambda s: ("    " if len(s) > 0 else "") + s, ctors)) + "\n"
+        ctors = "\n".join([("    " if len(s) > 0 else "") + s for s in ctors]) + "\n"
     else:
         ctors = ""
 
     if len(members) > 0:
-        members = "\n".join(map(lambda s: "  " + s, members)) + "\n"
+        members = "\n".join(["  " + s for s in members]) + "\n"
     else:
         members = ""
 
@@ -119,7 +121,7 @@ class CppError(object):
         self.opcode = opcode
         self.opcode_name = opcode_name
 
-        self.names = map(str.lower, _n_item(name[-1], True))
+        self.names = list(map(str.lower, _n_item(name[-1], True)))
         self.name = "_".join(map(str.lower, self.names))
 
         self.nssopen = ""
@@ -171,17 +173,17 @@ class CppError(object):
                 ]
 
         if len(opcode_accessor) > 0:
-            opcode_accessor = "\n".join(map(lambda s: "    " + s, opcode_accessor)) + "\n"
+            opcode_accessor = "\n".join(["    " + s for s in opcode_accessor]) + "\n"
         else:
             opcode_accessor = ""
 
         if len(members) > 0:
-            members = "\n" + "\n".join(map(lambda s: "  " + s, members)) + "\n"
+            members = "\n" + "\n".join(["  " + s for s in members]) + "\n"
         else:
             members = ""
 
         if len(typedef) > 0:
-            typedef = "\n".join(map(lambda s: "    " + s, typedef)) + "\n\n"
+            typedef = "\n".join(["    " + s for s in typedef]) + "\n\n"
         else:
             typedef = ""
 
